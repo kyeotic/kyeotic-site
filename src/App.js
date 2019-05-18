@@ -50,7 +50,8 @@ function Shell() {
   useChain(
     active
       ? [arrowSwipeRightRef, rotateRef, arrowSwipeLeftRef]
-      : [arrowSwipeLeftRef, rotateRef, arrowSwipeRightRef]
+      : [arrowSwipeLeftRef, rotateRef, arrowSwipeRightRef],
+    [0, ...(active ? [0.1, 0.6] : [0.1, 0.6])]
   )
 
   return (
