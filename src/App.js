@@ -1,7 +1,13 @@
 import React, { useState, useRef } from 'react'
 
 import { GradientPinkRed as Gradient } from '@vx/gradient'
-import { useSpring, animated, useChain, interpolate } from 'react-spring'
+import {
+  useSpring,
+  animated,
+  useChain,
+  interpolate,
+  config
+} from 'react-spring'
 import './app.css'
 
 // const dashPath = 'M 100 550 L 700 550 L 700 475 L 100 475 Z'
@@ -10,19 +16,7 @@ const arrowPth = 'M 175 100 L 75 0 L 25 0 L 125 100 L 25 200 L 75 200 Z'
 
 function Shell() {
   const [active, setActive] = useState(false)
-  const [swipingRightDone, setRightDone] = useState(false)
-  const [swipingLeftDone, setLeftDone] = useState(false)
-  const [hovered, setHover] = useState(false)
   const toggleActive = () => setActive(!active)
-
-  // Dash rotate
-  const dashRotateRef = useRef()
-  const dashProps = useSpring({
-    ref: dashRotateRef,
-    transform: !active
-      ? 'translate(0px, 0px) rotate(0deg)'
-      : 'translate(0px, 0px) rotate(-90deg)'
-  })
 
   // Arrow Swipe Right
   const rightStart = '0px'
@@ -30,45 +24,33 @@ function Shell() {
   const arrowSwipeRightRef = useRef()
   const { translateX } = useSpring({
     ref: arrowSwipeRightRef,
-    translateX: !active ? rightStart : rightEnd,
-    onFrame: ({ translateX }) => {
-      translateX === rightEnd && setRightDone(true)
-      translateX === rightStart && setRightDone(false)
-    }
+    config: config.stiff,
+    translateX: !active ? rightStart : rightEnd
   })
 
-  // Arrow Rotate
-  const arrowRotateRef = useRef()
-  const { rotation } = useSpring({
-    ref: arrowRotateRef,
-    rotation: !active ? '0deg' : '180deg'
+  // Rotate
+  const rotateRef = useRef()
+  const { dashRotate, arrowRotate } = useSpring({
+    ref: rotateRef,
+    dashRotate: !active
+      ? 'translate(0px, 0px) rotate(0deg)'
+      : 'translate(0px, 0px) rotate(-90deg)',
+    arrowRotate: !active ? '0deg' : '180deg'
   })
-
   // Arrow Swipe LEft
   const leftStart = '900px'
   const leftEnd = '170px'
   const arrowSwipeLeftRef = useRef()
   const { translateXLeft } = useSpring({
     ref: arrowSwipeLeftRef,
-    translateXLeft: !active ? leftStart : leftEnd,
-    onFrame: ({ translateXLeft }) => {
-      translateXLeft === leftEnd && setLeftDone(true)
-      translateXLeft === leftStart && setLeftDone(false)
-    }
+    config: config.stiff,
+    translateXLeft: !active ? leftStart : leftEnd
   })
-
-  if (swipingRightDone) console.log('right finished')
-  if (swipingLeftDone) console.log('left done')
-
-  let useRight =
-    (active && !swipingRightDone) ||
-    (!active && !swipingLeftDone && !swipingLeftDone)
-  console.log('use', active, useRight)
 
   useChain(
     active
-      ? [arrowSwipeRightRef, dashRotateRef, arrowRotateRef, arrowSwipeLeftRef]
-      : [arrowSwipeLeftRef, arrowRotateRef, dashRotateRef, arrowSwipeRightRef]
+      ? [arrowSwipeRightRef, rotateRef, arrowSwipeLeftRef]
+      : [arrowSwipeLeftRef, rotateRef, arrowSwipeRightRef]
   )
 
   return (
@@ -77,9 +59,13 @@ function Shell() {
         style={{
           position: 'absolute ',
           transform: interpolate(
-            [translateX, translateXLeft, rotation],
+            [translateX, translateXLeft, arrowRotate],
             (x, xLeft, r) =>
-              `translate(${useRight ? x : xLeft}, 0px) rotate(${r})`
+              `translate(${
+                (active && x !== rightEnd) || (!active && xLeft === leftStart)
+                  ? x
+                  : xLeft
+              }, 0px) rotate(${r})`
           )
         }}
       >
@@ -96,7 +82,7 @@ function Shell() {
           // top: '450px',
           left: '200px',
           transformOrigin: 'bottom left',
-          ...dashProps
+          transform: dashRotate
         }}
       >
         <svg width="200" viewBox="0 0 200 200">
