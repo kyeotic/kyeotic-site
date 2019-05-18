@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react'
-
 import { GradientPinkRed as Gradient } from '@vx/gradient'
 import {
   useSpring,
@@ -10,7 +9,6 @@ import {
 } from 'react-spring'
 import './app.css'
 
-// const dashPath = 'M 100 550 L 700 550 L 700 475 L 100 475 Z'
 const dashPath = 'M 0 200 L 200 200 L 200 165 L 0 165 Z'
 const arrowPth = 'M 175 100 L 75 0 L 25 0 L 125 100 L 25 200 L 75 200 Z'
 
@@ -99,6 +97,4 @@ function Shell() {
 
 export default function App() {
   return <Shell />
-  // <Canvas>
-  // </Canvas>
 }
